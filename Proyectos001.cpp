@@ -1,18 +1,13 @@
+//segunda actualizacion
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <vector>
-#include <fstream>
-//#include <locale.h>                           //soporte para distintos tipos de formatos, linux
 #include <wchar.h>                              // soporte para amplios tipos de caracteres, windows
-
 #include <Windows.h>
 #include <sstream>
 #include <climits>
 
 using namespace std;
 
-// Definición de variables
 struct dato {                                   // Definición de la estructura/registro
     int anio = 0;
     string ciudad = "";
@@ -37,14 +32,21 @@ int temperaturaAlta = 0;
 string ciudadAlta = "";
 int temperaturaBaja = 1000;
 string ciudadBaja = "";
+int anioSolicitado = 2022;
+string ciudadActiva = "x";
+int contadorMesesCiudad = 0;
+string mesesTrimestre[3][4] = { {"enero","febrero","marzo","abril"},{"mayo","junio","julio","Agosto"},{"septiembre","octubre","noviembre","diciembre"} };
+int sumadorTrimestral[3] = { 0,0,0 };
+int contadorTrimestral[3] = { 0,0,0 };
+
+int trimestreEnCurso(string mes);
+float retornaPromedio(float a, float b);
 
 int main() {
 
-    setlocale(LC_ALL, "");                      //Cambia a la localidad actual
-    setlocale(LC_CTYPE, "Spanish");
     ifstream archivo(nombreArchivo.c_str());    // abre el archivo para lectura
+
     if (archivo) {                              // pregunta si el archivo se abrió correctamente
-        cout << "<< Archivo abierto con exito. >>" << endl;
         cout << " " << endl;
         while (getline(archivo, linea)) {
             //cout << linea << endl;            // Lo vamos imprimiendo
@@ -84,42 +86,66 @@ int main() {
 
         // Generar un ciclo para listar el vector
         for (size_t i = 0; i < datos.size(); i++) {
-            /*cout << i+1 << "\t";
-            cout << datos[i].anio << "\t";
-            cout << datos[i].ciudad << "\t\t";
-            cout << datos[i].mes << "\t\t\t";
-            cout << datos[i].temperatura << "\t";
-            cout << datos[i].precipitacion < < "\t";
-            cout << endl;*/
-
-            cantidadAguaCaida = cantidadAguaCaida + datos[i].temperatura;
             if (datos[i].temperatura > temperaturaAlta) {
                 temperaturaAlta = datos[i].temperatura;
                 ciudadAlta = datos[i].ciudad;
             }
+            //actualizamos datos de temperatura baja
             if (datos[i].temperatura < temperaturaBaja) {
                 temperaturaBaja = datos[i].temperatura;
                 ciudadBaja = datos[i].ciudad;
             }
-        }
+            if (ciudadActiva != datos[i].ciudad) {
+                ciudadActiva = datos[i].ciudad;            // dejamos la ciudadActiva como nueva ciudad 
+                contadorMesesCiudad = 0;                    // inicilizamos el contador de meses
+            }
+
+            if (datos[i].anio == anioSolicitado) {          // verificamos que contabilizacion sea año solicitado (2022) 
+                if (ciudadActiva != datos[i].ciudad) {      // preguntamos si seguimos con la ciudad activa
+                    ciudadActiva = datos[i].ciudad;            // dejamos la ciudadActiva como nueva ciudad 
+                    contadorMesesCiudad = 1;                    // inicilizamos el contador de meses
+                }
+                string mes = datos[i].mes;
+                int opcion = trimestreEnCurso(mes);
 
 
-        SetConsoleOutputCP(CP_UTF8);
-        setvbuf(stdout, nullptr, _IONBF, 0);
+        datos.resize(0);            // limpia el vector dinamico.
 
-
-        cout << "Cantidad de agua caida en chile " << cantidadAguaCaida << endl;
-        cout << "La temperatura mas alta fue de " << temperaturaAlta << "°, registrada en " << ciudadAlta << endl;
-        cout << "La temperatura mas Baja fue de " << temperaturaBaja << "°, registrada en " << ciudadBaja << endl;
 
     }
     else {
+
         // EPA!! error
-        cout << "<< Archivo no existe. >>" << endl;
         cout << " " << endl;
     }
 
     datos.resize(0);            // limpia el vector dinamico.
-    system("PAUSE()");          // genera pausa.
+        system("PAUSE()");          // genera pausa.
+
+    }
     return 0;                   // termina prg sin problemas!!
+
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int trimestreEnCurso(string mes) {
+    // Convertir el mes a minúsculas
+    transform(mes.begin(), mes.end(), mes.begin(), ::tolower);
+    // Bucle a través de las filas de la matriz
+    for (int i = 0; i < 3; ++i) {
+        // Bucle a través de las columnas de la matriz
+        for (int j = 0; j < 4; ++j) {
+            // Si el valor actual coincide con el mes dado, devuelve el número de fila
+            if (mesesTrimestre[i][j] == mes) {
+                return i;
+            }
+        }
+    }
+}
+
+float retornaPromedio(float a, float b) {
+    float c = 0;
+    c = static_cast<float>(a / b);
+    return c;
+
